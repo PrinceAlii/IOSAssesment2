@@ -69,13 +69,14 @@ struct LaunchView: View {
                 }
                 .hidden()
             )
-            .sheet(isPresented: $showingSettings) {
+            .fullScreenCover(isPresented: $showingSettings) {
                 SettingsView()
                     .environmentObject(gameManager)
             }
-            .sheet(isPresented: $showingLeaderboard) {
+            .fullScreenCover(isPresented: $showingLeaderboard) {
                 ScoreboardView()
             }
+            
         }
     }
 }
