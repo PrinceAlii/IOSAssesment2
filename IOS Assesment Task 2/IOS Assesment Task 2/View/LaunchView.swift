@@ -7,17 +7,26 @@ struct LaunchView: View {
     @State private var navigateToGame = false
     @State private var showingLeaderboard = false
     @State private var topScore: Int = 0
+    @State private var titleScale: CGFloat = 0.5
 
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
                 Text("BubblePop")
-                    .font(.system(size: 48, weight: .bold))
-
+                  .font(.system(size: 48, weight: .semibold, design: .rounded))
+                  .scaleEffect(titleScale)
+                  .onAppear {
+                    withAnimation(.spring()) {
+                      titleScale = 1
+                    }
+                  }
+                
+            
                 Text("High Score: \(topScore)")
                     .font(.headline)
+                    .padding(.vertical, 12)
 
-                TextField("Enter your name", text: $playerNameInput)
+                TextField("What shall we call you?", text: $playerNameInput)
                     .padding()
                     .background(Color(white: 0.9))
                     .cornerRadius(8)
@@ -29,12 +38,19 @@ struct LaunchView: View {
                         navigateToGame = true
                     }
                     .buttonStyle(.borderedProminent)
+                    .clipShape(Capsule())
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 30)
                     .disabled(playerNameInput.trimmingCharacters(in: .whitespaces).isEmpty)
 
+                    
                     Button("Settings") {
                         showingSettings = true
                     }
                     .buttonStyle(.bordered)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 30)
+                    .clipShape(Capsule())
                 }
 
                 Button("Leaderboard") {
