@@ -3,49 +3,42 @@ import SwiftUI
 struct ScoreboardView: View {
     @Environment(\.presentationMode) private var presentationMode
     private let scores = Score.shared.topScores()
-
+    
     var body: some View {
-        NavigationView {
-            ZStack {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        ForEach(Array(scores.enumerated()), id: \.offset) { index, entry in
-                            let (name, score) = entry
-                            HStack {
-                                Text("\(index + 1).")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-
-                                Text(name)
-                                    .font(.body)
-                                    .foregroundColor(.primary)
-
-                                Spacer()
-
-                                Text("\(score)")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                            }
+        VStack(spacing: 24) {
+            Text("High Scores")
+                .font(.largeTitle)
+                .bold()
+                .padding(.top)
+            
+            ScrollView {
+                VStack(spacing: 16) {
+                    ForEach(Array(scores.enumerated()), id: \.offset) { idx, entry in
+                        HStack {
+                            Text("\(idx+1).").bold()
+                            Text(entry.0)
+                            Spacer()
+                            Text("\(entry.1)")
                         }
-                    }
-                    .padding()
-                }
-            }
-            .navigationTitle("High Scores")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
-                        presentationMode.wrappedValue.dismiss()
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white))
+                        .shadow(radius: 2)
                     }
                 }
+                .padding(.horizontal)
             }
+            
+            Button("Close") {
+                presentationMode.wrappedValue.dismiss()
+            }
+            .font(.headline)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            
+            Spacer()
         }
-    }
-}
-
-struct ScoreboardView_Previews: PreviewProvider {
-    static var previews: some View {
-        ScoreboardView()
-            .environmentObject(GameManager())
+        .background(Color(.systemGray6).ignoresSafeArea())
     }
 }

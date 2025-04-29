@@ -6,6 +6,8 @@ struct BubbleView: View {
 
     var body: some View {
         ZStack {
+            
+            // bubble with gradient
             Circle()
                 .fill(
                     RadialGradient(
@@ -18,6 +20,7 @@ struct BubbleView: View {
                 .frame(width: bubble.size, height: bubble.size)
                 .shadow(color: .black.opacity(0.2), radius: 4, x: 2, y: 2)
 
+            // bubble highlight
             Circle()
                 .fill(Color.white.opacity(0.4))
                 .frame(width: bubble.size * 0.3, height: bubble.size * 0.3)
@@ -27,5 +30,12 @@ struct BubbleView: View {
         .onTapGesture {
             gameManager.pop(bubble)
         }
+    }
+}
+
+struct BubbleView_Previews: PreviewProvider {
+    static var previews: some View {
+        BubbleView(bubble: Bubble(colour: .blue, position: CGPoint(x: 100, y: 100), size: 60))
+            .environmentObject(GameManager())
     }
 }

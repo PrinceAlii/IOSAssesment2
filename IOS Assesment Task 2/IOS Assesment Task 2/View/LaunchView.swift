@@ -2,15 +2,14 @@ import SwiftUI
 
 struct LaunchView: View {
     @EnvironmentObject private var gameManager: GameManager
-    @State private var playerNameInput = ""
+    @State private var playerName = ""
     @State private var showingSettings = false
-    @State private var navigateToGame = false
     @State private var showingLeaderboard = false
-    @State private var topScore: Int = 0
+    @State private var playingGame = false
     @State private var titleScale: CGFloat = 0.5
 
     var body: some View {
-        NavigationView {
+        ZStack {
             VStack(spacing: 20) {
                 Text("BubblePop")
                   .font(.system(size: 48, weight: .semibold, design: .rounded))
@@ -20,13 +19,12 @@ struct LaunchView: View {
                       titleScale = 1
                     }
                   }
-                
-            
-                Text("High Score: \(topScore)")
+
+                Text("High Score: \(Score.shared.topScores().first?.1 ?? 0)")
                     .font(.headline)
                     .padding(.vertical, 12)
-
-                TextField("What shall we call you?", text: $playerNameInput)
+                
+                TextField("What shall we call you?", text: $playerName)
                     .padding()
                     .background(Color(white: 0.9))
                     .cornerRadius(8)
@@ -34,15 +32,14 @@ struct LaunchView: View {
 
                 HStack(spacing: 20) {
                     Button("Start Game") {
-                        gameManager.playerName = playerNameInput.trimmingCharacters(in: .whitespaces)
-                        navigateToGame = true
+                        gameManager.playerName = playerName.trimmingCharacters(in: .whitespaces)
+                        playingGame = true
                     }
                     .buttonStyle(.borderedProminent)
                     .clipShape(Capsule())
                     .padding(.vertical, 12)
                     .padding(.horizontal, 30)
-                    .disabled(playerNameInput.trimmingCharacters(in: .whitespaces).isEmpty)
-
+                    .disabled(playerName.trimmingCharacters(in: .whitespaces).isEmpty)
                     
                     Button("Settings") {
                         showingSettings = true
@@ -58,25 +55,18 @@ struct LaunchView: View {
                 }
                 .padding(.top)
             }
-            .onAppear {
-                topScore = Score.shared.topScores().first?.1 ?? 0
-            }
-            .background(
-                NavigationLink(destination: GameView()
-                                .environmentObject(gameManager),
-                               isActive: $navigateToGame) {
-                    EmptyView()
-                }
-                .hidden()
-            )
-            .fullScreenCover(isPresented: $showingSettings) {
-                SettingsView()
-                    .environmentObject(gameManager)
-            }
-            .fullScreenCover(isPresented: $showingLeaderboard) {
-                ScoreboardView()
-            }
-            
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
+                .environmentObject(gameManager)
+        }
+        .sheet(isPresented: $showingLeaderboard) {
+            ScoreboardView()
+        }
+
+        .fullScreenCover(isPresented: $playingGame) {
+            GameView()
+                .environmentObject(gameManager)
         }
     }
 }

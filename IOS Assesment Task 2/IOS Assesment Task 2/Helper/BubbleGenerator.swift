@@ -1,27 +1,39 @@
 import SwiftUI
 
-// generate non overlapping bubbles
 struct BubbleGenerator {
     static func generate(maxCount: Int, in canvas: CGSize) -> [Bubble] {
         var result: [Bubble] = []
+        let diameter: CGFloat = 60
+        let radius = diameter / 2
+
+        // define valid centre range
+        let minX = radius
+        let maxX = canvas.width - radius
+        let minY = radius
+        let maxY = canvas.height - radius
+
         for _ in 0..<maxCount {
             let colour = randomColour()
-            let size: CGFloat = 60
-            let radius = size / 2
-            let x = CGFloat.random(in: radius...(canvas.width - radius))
-            let y = CGFloat.random(in: radius...(canvas.height - radius))
-            let point = CGPoint(x: x, y: y)
+            
+            // choose a random point thats fully inside bounds
+            let x = CGFloat.random(in: minX...maxX)
+            let y = CGFloat.random(in: minY...maxY)
+            let bubble = Bubble(colour: colour,
+                                position: CGPoint(x: x, y: y),
+                                size: diameter)
 
-            // find overlapping bubles, and skip them
-            if result.contains(where: { bubble in
-                let dx = bubble.position.x - point.x
-                let dy = bubble.position.y - point.y
-                return sqrt(dx*dx + dy*dy) < (bubble.size/2 + radius)
+            // skip if the bubbles are going to overlap
+            if result.contains(where: { existing in
+                let dx = existing.position.x - x
+                let dy = existing.position.y - y
+                return sqrt(dx*dx + dy*dy) < (existing.size/2 + radius)
             }) {
                 continue
             }
-            result.append(Bubble(colour: colour, position: point, size: size))
+
+            result.append(bubble)
         }
+
         return result
     }
 
