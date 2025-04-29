@@ -1,24 +1,18 @@
-//
-//  ContentView.swift
-//  IOS Assesment Task 2
-//
-//  Created by Ali bonagdaran on 24/4/2025.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject private var gameManager: GameManager
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        LaunchView()
+            .environmentObject(gameManager)
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            .environmentObject(GameManager())
+    }
 }
+    

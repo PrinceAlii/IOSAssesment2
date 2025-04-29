@@ -3,76 +3,64 @@ import Combine
 
 // game logic and state
 class GameManager: ObservableObject {
-    @Published var playerName: String = ""
+    @Published var playerName = ""
     @Published var timeRemaining: Int
-    @Published var score: Int = 0
+    @Published var score = 0
     @Published var bubbles: [Bubble] = []
     @Published var settings: Settings
 
-    private var timerCancellable: AnyCancellable?
-    private var lastPoppedColour: BubbleColour?
-    private var comboCount: Int = 0
+    private var timer: AnyCancellable?
+    private var lastColour: BubbleColour?
 
     init(settings: Settings = Settings()) {
-        self.settings    = settings
+        self.settings = settings
         self.timeRemaining = settings.duration
     }
 
     // new game run
-    func startGame() {
-        resetGame()
-        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+    func startGame(canvasSize: CGSize) {
+        resetGame(canvasSize: canvasSize)
+        timer?.cancel()
+        timer = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
-            .sink { [weak self] _ in self?.tick() }
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.timeRemaining -= 1
+                if self.timeRemaining > 0 {
+                    self.bubbles = BubbleGenerator.generate(
+                        maxCount: self.settings.maxBubbles,
+                        in: canvasSize
+                    )
+                } else {
+                    self.endGame()
+                }
+            }
     }
-
+        
     // state reset for fresh fgame
-    func resetGame() {
+    func resetGame(canvasSize: CGSize) {
         timeRemaining = settings.duration
-        score         = 0
+        score = 0
         bubbles = BubbleGenerator.generate(
             maxCount: settings.maxBubbles,
-            in: UIScreen.main.bounds.size
+            in: canvasSize
         )
-        lastPoppedColour = nil
-        comboCount       = 0
-    }
-
-    private func tick() {
-        guard timeRemaining > 0 else {
-            endGame()
-            return
-        }
-        timeRemaining -= 1
-        refreshBubbles()
+        lastColour = nil
     }
 
     // handle a bubble pop, remove it, calculate total points, and update the score
     func pop(_ bubble: Bubble) {
-        guard let idx = bubbles.firstIndex(where: { $0.id == bubble.id }) else { return }
-        bubbles.remove(at: idx)
-
-        let base = bubble.colour.points
-        let isCombo = bubble.colour == lastPoppedColour
-        let pointsAwarded = isCombo
-            ? Int(round(Double(base) * 1.5))
-            : base
-
-        score += pointsAwarded
-        lastPoppedColour = bubble.colour
-        comboCount       = isCombo ? comboCount + 1 : 1
-    }
-
-    // fetch bubble probabilities and create new ones based off that
-    func refreshBubbles() {
-        bubbles = BubbleGenerator.generate(
-            maxCount: settings.maxBubbles,
-            in: UIScreen.main.bounds.size
-        )
+        if let index = bubbles.firstIndex(where: { $0.id == bubble.id }) {
+            bubbles.remove(at: index)
+            let base = bubble.colour.points
+            let bonus = (bubble.colour == lastColour) ? Int(Double(base) * 0.5) : 0
+            score += base + bonus
+            lastColour = bubble.colour
+        }
     }
 
     private func endGame() {
-        timerCancellable?.cancel()
+        timer?.cancel()
         Score.shared.saveScore(name: playerName, score: score)
     }
 }
