@@ -8,18 +8,20 @@ struct GameView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Color.white.ignoresSafeArea()
                 VStack {
                     HStack {
                         VStack(alignment: .leading) {
                             Text("Time Remaining: \(gameManager.timeRemaining)")
+                                .bold()
                             Text("Your High Score: \(sessionHigh)")
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.black)
+                                .bold()
                         }
                         Spacer()
                         Text("Score: \(gameManager.score)")
                             .font(.title2)
+                            .bold()
                     }
                     .padding()
 
@@ -31,6 +33,8 @@ struct GameView: View {
                     .frame(width: geo.size.width, height: geo.size.height)
                 }
             }
+            .navigationBarBackButtonHidden(true)
+            .background(Gradient(colors: [.teal, .cyan, .green]).opacity(0.6))
             .onAppear {
                 sessionHigh = Score.shared.topScores().first { $0.0 == gameManager.playerName }?.1 ?? 0
                 gameManager.startGame(canvasSize: geo.size)

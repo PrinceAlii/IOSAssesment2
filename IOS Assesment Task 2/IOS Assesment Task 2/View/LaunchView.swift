@@ -42,7 +42,6 @@ struct LaunchView: View {
                 }
                 .padding(.top)
             }
-            .navigationTitle("Welcome")
             .onAppear {
                 topScore = Score.shared.topScores().first?.1 ?? 0
             }
