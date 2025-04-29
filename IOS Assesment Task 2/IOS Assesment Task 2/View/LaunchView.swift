@@ -5,12 +5,17 @@ struct LaunchView: View {
     @State private var playerNameInput = ""
     @State private var showingSettings = false
     @State private var navigateToGame = false
+    @State private var showingLeaderboard = false
+    @State private var topScore: Int = 0
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 30) {
+            VStack(spacing: 20) {
                 Text("BubblePop")
                     .font(.system(size: 48, weight: .bold))
+
+                Text("High Score: \(topScore)")
+                    .font(.headline)
 
                 TextField("Enter your name", text: $playerNameInput)
                     .padding()
@@ -31,12 +36,15 @@ struct LaunchView: View {
                     }
                     .buttonStyle(.bordered)
                 }
+
+                Button("Leaderboard") {
+                    showingLeaderboard = true
+                }
                 .padding(.top)
             }
             .navigationTitle("Welcome")
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
-                    .environmentObject(gameManager)
+            .onAppear {
+                topScore = Score.shared.topScores().first?.1 ?? 0
             }
             .background(
                 NavigationLink(destination: GameView()
@@ -46,6 +54,20 @@ struct LaunchView: View {
                 }
                 .hidden()
             )
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+                    .environmentObject(gameManager)
+            }
+            .sheet(isPresented: $showingLeaderboard) {
+                ScoreboardView()
+            }
         }
     }
+}
+
+struct LaunchView_Previews: PreviewProvider {
+  static var previews: some View {
+    LaunchView()
+      .environmentObject(GameManager())
+  }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct GameView: View {
     @EnvironmentObject private var gameManager: GameManager
     @State private var showScoreboard = false
+    @State private var sessionHigh: Int = 0
 
     var body: some View {
         GeometryReader { geo in
@@ -10,8 +11,12 @@ struct GameView: View {
                 Color.white.ignoresSafeArea()
                 VStack {
                     HStack {
-                        Text("Time: \(gameManager.timeRemaining)")
-                            .font(.title2)
+                        VStack(alignment: .leading) {
+                            Text("Time Remaining: \(gameManager.timeRemaining)")
+                            Text("Your High Score: \(sessionHigh)")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
                         Spacer()
                         Text("Score: \(gameManager.score)")
                             .font(.title2)
@@ -27,7 +32,13 @@ struct GameView: View {
                 }
             }
             .onAppear {
+                sessionHigh = Score.shared.topScores().first { $0.0 == gameManager.playerName }?.1 ?? 0
                 gameManager.startGame(canvasSize: geo.size)
+            }
+            .onReceive(gameManager.$score) { newScore in
+                if newScore > sessionHigh {
+                    sessionHigh = newScore
+                }
             }
             .onReceive(gameManager.$timeRemaining) { newTime in
                 if newTime <= 0 {
